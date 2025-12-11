@@ -1,0 +1,25 @@
+package com.aischool.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+import com.aischool.service.navService;
+
+@Controller
+public class NavController {
+	
+	@Autowired
+	private navService navService;
+	
+	@GetMapping("/mypage")
+	public String mypage(Model model) {
+		return navService.goMypage(model);
+	}
+	
+	@GetMapping("/reservationStatus")
+	public String reservationStatus(Model model) {
+		return navService.goReservationStatus(model);
+	}
+}

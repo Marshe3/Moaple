@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aischool.mapper.MypageMapper">
+	<select id="usercomment" parameterType="int" resultType="com.aischool.entity.Comments">
+		SELECT * FROM COMMENTS WHERE USERID = #{userId} ORDER BY COMMENTID DESC
+	</select>
+	
+	<select id="mypage" parameterType="int" resultType="com.aischool.entity.Users">
+		SELECT * FROM USERS WHERE USERID = #{userId}
+	</select>
+	
+	<update id="userModify" parameterType="com.aischool.entity.Users">
+		UPDATE USERS
+		<set>
+			<if test="phone != null and phone != ''">PHONE = #{phone},</if>
+			<if test="trackId != null and trackId != ''">TRACKID = #{trackId},</if>
+			<if test="profileImg != null and profileImg != ''">PROFILEIMG = #{profileImg},</if>
+			<if test="password != null and password != ''">PASSWORD = #{password},</if>
+			<if test="name != null and name != ''">NAME = #{name},</if>
+			<if test="projectTeamName != null and projectTeamName != ''">PROJECTTEAMNAME = #{projectTeamName},</if>
+		</set>
+		WHERE USERID = #{userId}
+	</update>
+	
+	<select id="myReservation" parameterType="int" resultType="com.aischool.entity.Reservation">
+		SELECT * FROM RESERVATION WHERE USERID = #{userId} ORDER BY RESERVATIONID DESC
+	</select>
+	<select id="myRoomName" parameterType="int" resultType="String">
+		SELECT ROOMNAME FROM STUDYROOMS WHERE ROOMID = #{roomId}
+	</select>
+	<select id="myTrackName" parameterType="int" resultType="String">
+		SELECT TRACKNAME FROM TRACKS WHERE TRACKID = #{trackId}
+	</select>
+	<select id="IprofileImg" parameterType="int" resultType="String">
+		SELECT PROFILEIMG FROM USERS WHERE USERID = #{userId}
+	</select>
+</mapper>

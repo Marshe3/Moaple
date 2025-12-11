@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aischool.mapper.ReservationMapper">
+
+<select id="reservationList" resultType="com.aischool.entity.Reservation">
+	SELECT * FROM RESERVATION ORDER BY reservationId ASC
+</select>
+
+<select id="studyRoomsList" resultType="com.aischool.entity.StudyRooms">
+	SELECT * FROM STUDYROOMS ORDER BY roomId ASC
+</select>
+
+<insert id="insertReservation" parameterType="com.aischool.entity.Reservation">
+	INSERT INTO reservation (
+		userId, 
+		trackId, 
+		roomId, 
+		reservationDate, 
+		startTime, 
+		endTime, 
+		participantCount, 
+		purpose, 
+		status, 
+		createdAt
+	) VALUES (
+		#{userId}, 
+		#{trackId}, 
+		#{roomId}, 
+		#{reservationDate}, 
+		#{startTime}, 
+		#{endTime}, 
+		#{participantCount}, 
+		#{purpose}, 
+		#{status, typeHandler=org.apache.ibatis.type.EnumTypeHandler}, 
+		#{createdAt}
+	)
+</insert>
+
+<select id="getRoomIdByName" parameterType="string" resultType="integer">
+	SELECT roomId FROM STUDYROOMS WHERE roomName = #{roomName}
+</select>
+
+<select id="getReservationsFromTodayToTomorrow" resultType="com.aischool.entity.Reservation">
+	<![CDATA[
+	SELECT * FROM RESERVATION 
+	WHERE reservationDate >= CURDATE() 
+	AND reservationDate <= DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+	AND (status = 'ACTIVE' OR status = 'active' OR status = 'COMPLETED' OR status = 'completed')
+	ORDER BY reservationDate ASC, startTime ASC
+	]]>
+</select>
+
+</mapper>

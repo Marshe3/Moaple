@@ -1,0 +1,31 @@
+CREATE TABLE users(
+    userId INT NOT NULL AUTO_INCREMENT,
+    trackId INT NOT NULL,
+    userName VARCHAR(100) NOT NULL,
+    password VARCHAR(200) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    projectTeamName VARCHAR(200) NOT NULL,
+    createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    phone VARCHAR(20),
+    profileImg VARCHAR(500) DEFAULT 'default_img.png',
+    PRIMARY KEY(userId),
+    FOREIGN KEY(trackId) REFERENCES tracks(trackId)
+);
+DROP TABLE users;
+
+SELECT * FROM users;
+
+COMMIT;
+
+
+
+
+
+
+
+
+
+
+
+

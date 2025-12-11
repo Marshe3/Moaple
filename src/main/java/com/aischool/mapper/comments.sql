@@ -1,0 +1,14 @@
+CREATE TABLE comments(
+	commentId INT NOT NULL AUTO_INCREMENT,
+	communityId INT NOT NULL,
+	userId INT NOT NULL,
+	content VARCHAR(1000) NOT NULL, 
+	createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY(commentId),
+	FOREIGN KEY(communityId) REFERENCES community(communityId),
+	FOREIGN KEY(userId) REFERENCES users(userId)
+);
+DROP TABLE comments;
+commit;
+select * from comments;

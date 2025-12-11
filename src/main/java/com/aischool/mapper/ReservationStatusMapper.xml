@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aischool.mapper.ReservationStatusMapper">
+
+    <!-- 특정 날짜/시간/장소의 예약 현황 조회 -->
+    <select id="getReservationStatus" resultType="map">
+        SELECT 
+            r.reservationId,
+            r.reservationDate as date,
+            CONCAT(r.startTime, ' - ', r.endTime) as time,
+            sr.floor,
+            sr.roomName as room,
+            CASE 
+                WHEN r.status = 'active' THEN '예약 완료'
+                WHEN r.status = 'completed' THEN '예약 완료'
+                WHEN r.status = 'cancelled' THEN '예약 가능'
+                ELSE '예약 불가'
+            END as status
+        FROM reservation r
+        JOIN studyRooms sr ON r.roomId = sr.roomId
+        WHERE r.reservationDate = #{date}
+        AND r.startTime = #{startTime}
+        AND r.roomId = #{roomId}
+        AND r.status != 'cancelled'
+    </select>
+
+    <!-- 모든 예약 현황 조회 (페이징) -->
+    <select id="getAllReservationStatus" resultType="map">
+        SELECT 
+            r.reservationId,
+            r.reservationDate as date,
+            CONCAT(r.startTime, ' - ', r.endTime) as time,
+            CONCAT(sr.floor, '층') as floor,
+            sr.roomName as room,
+            CASE 
+                WHEN r.status = 'active' THEN '예약 완료'
+                WHEN r.status = 'completed' THEN '예약 완료'
+                WHEN r.status = 'cancelled' THEN '예약 가능'
+                ELSE '예약 불가'
+            END as status
+        FROM reservation r
+        JOIN studyRooms sr ON r.roomId = sr.roomId
+        <where>
+            <if test="status != null and status != '전체'">
+                <choose>
+                    <when test="status == '예약 완료'">
+                        AND r.status IN ('active', 'completed')
+                    </when>
+                    <when test="status == '예약 가능'">
+                        AND r.status = 'cancelled'
+                    </when>
+                    <when test="status == '예약 불가'">
+                        AND r.status NOT IN ('active', 'completed', 'cancelled')
+                    </when>
+                </choose>
+            </if>
+        </where>
+        ORDER BY r.reservationDate DESC, r.startTime DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <!-- 전체 예약 현황 개수 조회 -->
+    <select id="getTotalReservationCount" resultType="int">
+        SELECT COUNT(*)
+        FROM reservation r
+        JOIN studyRooms sr ON r.roomId = sr.roomId
+        <where>
+            <if test="status != null and status != '전체'">
+                <choose>
+                    <when test="status == '예약 완료'">
+                        AND r.status IN ('active', 'completed')
+                    </when>
+                    <when test="status == '예약 가능'">
+                        AND r.status = 'cancelled'
+                    </when>
+                    <when test="status == '예약 불가'">
+                        AND r.status NOT IN ('active', 'completed', 'cancelled')
+                    </when>
+                </choose>
+            </if>
+        </where>
+    </select>
+
+    <!-- 모든 장소/날짜 조합을 기본 표시하고 예약 상태만 변경 -->
+    <select id="getAllPossibleReservations" resultType="map">
+        SELECT 
+            all_combinations.roomId,
+            all_combinations.floor,
+            all_combinations.room,
+            all_combinations.floorDisplay,
+            all_combinations.date,
+            CASE 
+                WHEN COALESCE(reserved_counts.reserved_count, 0) >= 13 THEN '예약 불가'
+                ELSE '예약 가능'
+            END as status,
+            CONCAT(COALESCE(reserved_counts.reserved_count, 0), ' / 13') as time_info
+        FROM (
+            SELECT 
+                sr.roomId,
+                sr.floor,
+                sr.roomName as room,
+                CONCAT(sr.floor, '층') as floorDisplay,
+                dates.date_val as date
+            FROM studyRooms sr
+            CROSS JOIN (
+                SELECT CURDATE() as date_val
+                UNION ALL
+                SELECT DATE_ADD(CURDATE(), INTERVAL 1 DAY) as date_val
+            ) dates
+        ) all_combinations
+        LEFT JOIN (
+            SELECT 
+                roomId,
+                reservationDate,
+                COUNT(DISTINCT startTime) as reserved_count
+            FROM reservation 
+            WHERE status IN ('active', 'completed')
+            AND reservationDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+            GROUP BY roomId, reservationDate
+        ) reserved_counts ON all_combinations.roomId = reserved_counts.roomId 
+                          AND all_combinations.date = reserved_counts.reservationDate
+        ORDER BY all_combinations.date, all_combinations.floor, all_combinations.room
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <!-- 전체 장소/날짜 조합 개수 조회 -->
+    <select id="getTotalPossibleReservationsCount" resultType="int">
+        SELECT COUNT(*)
+        FROM studyRooms sr
+        CROSS JOIN (
+            SELECT CURDATE() as date_val
+            UNION ALL
+            SELECT DATE_ADD(CURDATE(), INTERVAL 1 DAY) as date_val
+        ) dates
+    </select>
+
+</mapper>

@@ -1,0 +1,26 @@
+package com.aischool.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
+
+import com.aischool.mapper.NavMapper;
+
+@Service
+public class navService {
+	
+	@Autowired
+	private NavMapper mapper;
+	
+	public String goReservation(Model model) {
+		return "reservation";
+	}
+	
+	public String goMypage(Model model) {
+		return "mypage";
+	}
+	
+	public String goReservationStatus(Model model) {
+		return "reservationStatus";
+	}
+}
